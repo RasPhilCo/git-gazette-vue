@@ -5,42 +5,69 @@ import moment from 'moment';
 
 Vue.use(Vuex);
 
-const TOKEN = 'FOO';
-const ORG_NAME = 'oclif';
+const bus = new Vue({});
+const { GITHUB_OAUTH_TOKEN, GITHUB_ORG_NAME } = process.env;
 
 // iss.attributes.isArchived = !!iss.attributes.repository.archived;
 // iss.attributes.isPullRequest = !!iss.attributes.pull_request;
 // iss.attributes.repo = iss.attributes.repository.name
 // iss.attributes.htmlUrl = iss.attributes.html_url
+//   {
+//     title: 'fadgasd Dubbin',
+//     repo: 'fd@geocities.com',
+//     body: 'Mfsdfsfsfsdale',
+//     friendlyCreatedAt: 'sometime ago',
+//     friendlyUpdatedAt: 'sometime ago',
+//     created_at: new Date(),
+//     updated_at: new Date(),
+//     url: 'https://google.com',
+//     isArchived: false,
+//     isPullRequest: false,
+//   },
+//   {
+//     title: 'hsfd Dubbin',
+//     repo: 'gdfg@geocities.com',
+//     body: 'Masfdsfsfsfsle',
+//     friendlyCreatedAt: 'some time ago',
+//     friendlyUpdatedAt: 'some time ago',
+//     created_at: new Date(),
+//     updated_at: new Date(),
+//     url: 'https://google.com',
+//     isArchived: false,
+//     isPullRequest: true,
+//   },
+//   {
+//     title: 'fadgasd Dubbin',
+//     repo: 'sfsdgd@geocities.com',
+//     body: 'Mfsdfsfsfsdale',
+//     friendlyCreatedAt: 'some time ago',
+//     friendlyUpdatedAt: 'some time ago',
+//     created_at: new Date(),
+//     updated_at: new Date(),
+//     url: 'https://google.com',
+//     isArchived: false,
+//     isPullRequest: false,
+//   },
+//   {
+//     title: 'adsfew Dubbin',
+//     repo: 'hhd@geocities.com',
+//     body: 'Masfdsfsfsfsle',
+//     friendlyCreatedAt: 'some time ago',
+//     friendlyUpdatedAt: 'some time ago',
+//     created_at: new Date(),
+//     updated_at: new Date(),
+//     url: 'https://google.com',
+//     isArchived: false,
+//     isPullRequest: true,
+//   },
 
 export default new Vuex.Store({
   state: {
     issues: [
-      // {
-      //   title: 'Shawna Dubbin',
-      //   repo: 'sdubbin0@geocities.com',
-      //   body: 'Mfsdfsfsfsdale',
-      //   created_at: new Date(),
-      //   updated_at: new Date(),
-      //   url: 'https://google.com',
-      //   isArchived: false,
-      //   isPullRequest: false,
-      // },
-      // {
-      //   title: 'Shawna Dubbin',
-      //   repo: 'sdubbin0@geocities.com',
-      //   body: 'Masfdsfsfsfsle',
-      //   created_at: new Date(),
-      //   updated_at: new Date(),
-      //   url: 'https://google.com',
-      //   isArchived: false,
-      //   isPullRequest: true,
-      // },
     ],
   },
   mutations: {
     updateIssues(state, payload) {
-      console.log(payload.length);
       const model = payload.map((p) => {
         const m = p;
         m.isArchived = !!p.repository.archived;
@@ -51,9 +78,11 @@ export default new Vuex.Store({
         m.friendlyUpdatedAt = moment(p.updated_at).fromNow();
         return m;
       });
-      console.dir(model[0]);
-      console.dir(model[1]);
+      // console.log(model.length);
+      // console.dir(model[0]);
+      // console.dir(model[1]);
       state.issues = model.filter((c) => !c.isArchived);
+      bus.$emit('ChangeView', 1000);
     },
   },
   actions: {
@@ -75,10 +104,10 @@ export default new Vuex.Store({
           state: 'open',
         };
 
-        const response = await axios.get(`https://api.github.com/orgs/${ORG_NAME}/issues`, {
+        const response = await axios.get(`https://api.github.com/orgs/${GITHUB_ORG_NAME}/issues`, {
           params,
           headers: {
-            Authorization: `token ${TOKEN}`,
+            Authorization: `token ${GITHUB_OAUTH_TOKEN}`,
             Accept: 'application/vnd.github.machine-man-preview+json',
           },
         });
@@ -94,7 +123,7 @@ export default new Vuex.Store({
 
       await fetchPage(1);
       for (let i = Number(link.next.page); i <= maxPages; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
+      // eslint-disable-next-line no-await-in-loop
         await fetchPage(i);
       }
       context.commit('updateIssues', issues);

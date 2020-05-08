@@ -1,25 +1,58 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <!-- <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link> |
-      <router-link to="/frontpage">Frontpage</router-link> -->
-      <div class="md-display-3">
-        The oclif Git Gazette
-      </div>
-    </div>
-    <div class="line">
-    </div>
-    <div class="line line-bottom md-subheading">
+  <v-app id="sandbox">
+     <!-- <v-navigation-drawer
+      v-model="primaryDrawer.model"
+      :clipped="primaryDrawer.clipped"
+      :floating="primaryDrawer.floating"
+      :mini-variant="primaryDrawer.mini"
+      :permanent="primaryDrawer.type === 'permanent'"
+      :temporary="primaryDrawer.type === 'temporary'"
+      app
+      overflow
+    ></v-navigation-drawer> -->
+
+    <v-app-bar :clipped-left="primaryDrawer.clipped" app>
+      <!-- <v-app-bar-nav-icon
+        v-if="primaryDrawer.type !== 'permanent'"
+        @click.stop="primaryDrawer.model = !primaryDrawer.model"
+      ></v-app-bar-nav-icon> -->
+      <div>
+        Vol. {{lenIssues + lenPrs}}</div>
+      <v-spacer></v-spacer>
+      <v-toolbar-title id="gazette-title">The oclif Git Gazette</v-toolbar-title>
+      <v-spacer></v-spacer>
       {{ today }}
-    </div>
-    <router-view/>
-  </div>
+    </v-app-bar>
+    <v-content>
+      <router-view/>
+    </v-content>
+
+    <v-footer
+      :inset="footer.inset"
+      app
+    >
+      <span class="px-4"></span>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
+import store from './store';
 
 export default {
+  data: () => ({
+    drawers: ['Default (no property)', 'Permanent', 'Temporary'],
+    primaryDrawer: {
+      model: null,
+      type: 'default (no property)',
+      clipped: false,
+      floating: false,
+      mini: false,
+    },
+    footer: {
+      inset: false,
+    },
+  }),
   computed: {
     today: () => {
       const date = new Date();
@@ -31,40 +64,19 @@ export default {
       const formatted = date.toLocaleString('en-us', options);
       return formatted;
     },
-  },
-  components: {
+    lenIssues: () => store.state.issues.filter((i) => !i.isPullRequest).length,
+    lenPrs: () => store.state.issues.filter((i) => i.isPullRequest).length,
   },
 };
 </script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
 }
 
-.line {
-  border-bottom: solid gray 1px;
-
-}
-
-.line-bottom {
-  margin-bottom: 20px;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+#gazette-title {
+  font-family: 'Bevan', cursive;
 }
 </style>
