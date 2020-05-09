@@ -3,68 +3,14 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import moment from 'moment';
 
+const parseLinkHeader = require('parse-link-header');
+
 Vue.use(Vuex);
-
-const bus = new Vue({});
-const { GITHUB_OAUTH_TOKEN, GITHUB_ORG_NAME } = process.env;
-
-// iss.attributes.isArchived = !!iss.attributes.repository.archived;
-// iss.attributes.isPullRequest = !!iss.attributes.pull_request;
-// iss.attributes.repo = iss.attributes.repository.name
-// iss.attributes.htmlUrl = iss.attributes.html_url
-//   {
-//     title: 'fadgasd Dubbin',
-//     repo: 'fd@geocities.com',
-//     body: 'Mfsdfsfsfsdale',
-//     friendlyCreatedAt: 'sometime ago',
-//     friendlyUpdatedAt: 'sometime ago',
-//     created_at: new Date(),
-//     updated_at: new Date(),
-//     url: 'https://google.com',
-//     isArchived: false,
-//     isPullRequest: false,
-//   },
-//   {
-//     title: 'hsfd Dubbin',
-//     repo: 'gdfg@geocities.com',
-//     body: 'Masfdsfsfsfsle',
-//     friendlyCreatedAt: 'some time ago',
-//     friendlyUpdatedAt: 'some time ago',
-//     created_at: new Date(),
-//     updated_at: new Date(),
-//     url: 'https://google.com',
-//     isArchived: false,
-//     isPullRequest: true,
-//   },
-//   {
-//     title: 'fadgasd Dubbin',
-//     repo: 'sfsdgd@geocities.com',
-//     body: 'Mfsdfsfsfsdale',
-//     friendlyCreatedAt: 'some time ago',
-//     friendlyUpdatedAt: 'some time ago',
-//     created_at: new Date(),
-//     updated_at: new Date(),
-//     url: 'https://google.com',
-//     isArchived: false,
-//     isPullRequest: false,
-//   },
-//   {
-//     title: 'adsfew Dubbin',
-//     repo: 'hhd@geocities.com',
-//     body: 'Masfdsfsfsfsle',
-//     friendlyCreatedAt: 'some time ago',
-//     friendlyUpdatedAt: 'some time ago',
-//     created_at: new Date(),
-//     updated_at: new Date(),
-//     url: 'https://google.com',
-//     isArchived: false,
-//     isPullRequest: true,
-//   },
 
 export default new Vuex.Store({
   state: {
-    issues: [
-    ],
+    issues: [],
+    loading: false,
   },
   mutations: {
     updateIssues(state, payload) {
@@ -78,22 +24,25 @@ export default new Vuex.Store({
         m.friendlyUpdatedAt = moment(p.updated_at).fromNow();
         return m;
       });
-      // console.log(model.length);
-      // console.dir(model[0]);
-      // console.dir(model[1]);
       state.issues = model.filter((c) => !c.isArchived);
-      bus.$emit('ChangeView', 1000);
+      state.loading = false;
+    },
+    updateLoading(state, payload) {
+      state.loading = payload;
     },
   },
   actions: {
     async refreshIssues(context) {
+      context.commit('updateLoading', true);
       const issues = [];
       let link;
       let maxPages = 1;
 
-      // eslint-disable-next-line consistent-return
       const fetchPage = async (page) => {
-        console.dir(page);
+        const org = localStorage.currentOrg;
+        const appToken = localStorage.accessToken;
+
+        console.dir(`Fetching issues for ${org}, page ${page}...`);
 
         if (!page) { return null; }
 
@@ -104,40 +53,28 @@ export default new Vuex.Store({
           state: 'open',
         };
 
-        const response = await axios.get(`https://api.github.com/orgs/${GITHUB_ORG_NAME}/issues`, {
+        const response = await axios.get(`https://api.github.com/orgs/${org}/issues`, {
           params,
           headers: {
-            Authorization: `token ${GITHUB_OAUTH_TOKEN}`,
+            Authorization: `token ${appToken}`,
             Accept: 'application/vnd.github.machine-man-preview+json',
           },
         });
-        // console.dir(response);
+
         const batch = response.data;
         batch.forEach((ghi) => issues.push(ghi));
         if (page === 1) {
-          // eslint-disable-next-line global-require
-          link = require('parse-link-header')(response.headers.link);
-          maxPages = Number(link.last.page);
+          link = parseLinkHeader(response.headers.link);
+          maxPages = Number(link && link.last.page) || 1;
         }
       };
 
       await fetchPage(1);
-      for (let i = Number(link.next.page); i <= maxPages; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
+      for (let i = (Number(link && link.next.page) || 2); i <= maxPages; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
         await fetchPage(i);
       }
       context.commit('updateIssues', issues);
     },
-    // async refreshIssues(context) {
-    //   const response = await axios.get(`https://api.github.com/orgs/${ORG_NAME}/issues`, {
-    //     headers: {
-    //       Authorization: `token ${TOKEN}`,
-    //       Accept: 'application/vnd.github.machine-man-preview+json',
-    //     },
-    //   });
-    //   context.commit('updateIssues', response.data);
-    // },
   },
-  // modules: {
-  // },
 });

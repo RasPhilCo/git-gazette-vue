@@ -1,25 +1,67 @@
 <template>
-  <v-app id="sandbox">
-     <!-- <v-navigation-drawer
-      v-model="primaryDrawer.model"
-      :clipped="primaryDrawer.clipped"
-      :floating="primaryDrawer.floating"
-      :mini-variant="primaryDrawer.mini"
-      :permanent="primaryDrawer.type === 'permanent'"
-      :temporary="primaryDrawer.type === 'temporary'"
-      app
-      overflow
-    ></v-navigation-drawer> -->
+  <v-app id="app">
+    <v-overlay v-if="loading"
+      :absolute="absolute"
+      :value="overlay"
+    >
+        <v-progress-circular
+          :size="70"
+          :width="7"
+          color="purple"
+          indeterminate
+        ></v-progress-circular>
+    </v-overlay>
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      temporary
+    >
+      <v-list
+        nav
+        dense
+      >
+        <v-list-item-group
+          active-class="deep-purple--text text--accent-4"
+        >
+          <v-list-item
+            link
+          >
+            <v-select
+              :items="orgs"
+              v-model="currentOrg"
+              hide-selected
+              label="Select gazette"
+              v-on:change="orgSelect"
+            ></v-select>
+          </v-list-item>
 
-    <v-app-bar :clipped-left="primaryDrawer.clipped" app>
-      <!-- <v-app-bar-nav-icon
-        v-if="primaryDrawer.type !== 'permanent'"
-        @click.stop="primaryDrawer.model = !primaryDrawer.model"
-      ></v-app-bar-nav-icon> -->
+          <v-list-item
+            v-for="item in nav.model"
+            :key="item.title"
+            link
+            :href="item.link"
+            target="_blank"
+          >
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar app>
+      <v-app-bar-nav-icon
+        @click.stop="drawer = !drawer"
+      ></v-app-bar-nav-icon>
       <div>
         Vol. {{lenIssues + lenPrs}}</div>
       <v-spacer></v-spacer>
-      <v-toolbar-title id="gazette-title">The oclif Git Gazette</v-toolbar-title>
+      <v-toolbar-title id="gazette-title">The {{currentOrg}} Git Gazette</v-toolbar-title>
       <v-spacer></v-spacer>
       {{ today }}
     </v-app-bar>
@@ -41,17 +83,20 @@ import store from './store';
 
 export default {
   data: () => ({
-    drawers: ['Default (no property)', 'Permanent', 'Temporary'],
-    primaryDrawer: {
-      model: null,
-      type: 'default (no property)',
-      clipped: false,
-      floating: false,
-      mini: false,
+    drawer: false,
+    nav: {
+      model: [
+        {
+          title: 'Auth/Re-auth',
+          icon: 'mdi-account-key-outline',
+          link: `https://github.com/login/oauth/authorize?client_id=${process.env.VUE_APP_GITHUB_CLIENT_ID}`,
+        },
+      ],
     },
     footer: {
       inset: false,
     },
+    currentOrg: localStorage.currentOrg,
   }),
   computed: {
     today: () => {
@@ -66,6 +111,14 @@ export default {
     },
     lenIssues: () => store.state.issues.filter((i) => !i.isPullRequest).length,
     lenPrs: () => store.state.issues.filter((i) => i.isPullRequest).length,
+    orgs: () => JSON.parse(localStorage.orgs || []),
+    loading: () => store.state.loading,
+  },
+  methods: {
+    orgSelect(org) {
+      localStorage.currentOrg = org;
+      window.location.reload();
+    },
   },
 };
 </script>

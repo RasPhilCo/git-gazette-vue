@@ -2,16 +2,19 @@
   <v-row class="mb-6">
     <v-col>
       <v-card-title>
-      Issues ({{issues.length}})
-      <v-spacer></v-spacer>
-      <v-text-field
-        v-model="issuesSearch"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
+        Issues ({{issues.length}})
+
+        <v-spacer></v-spacer>
+
+        <v-text-field
+          v-model="issuesSearch"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
       </v-card-title>
+
       <v-data-table
         :headers="headers"
         :items="issues"
@@ -27,10 +30,6 @@
         :sort-by="['friendlyUpdatedAt']"
         :sort-desc="[true]"
       >
-        <!-- <template v-slot:top>
-          <v-text-field v-model="issuesSearch" label="Search"
-          class="mx-4"></v-text-field>
-        </template> -->
         <template v-slot:item.title="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
@@ -41,18 +40,20 @@
         </template>
       </v-data-table>
     </v-col>
+
     <v-col>
       <v-card-title>
-      Pull Requests ({{prs.length}})
-      <v-spacer></v-spacer>
-      <v-text-field
-        v-model="prsSearch"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
+        Pull Requests ({{prs.length}})
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="prsSearch"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>
       </v-card-title>
+
       <v-data-table
         :headers="headers"
         :items="prs"
@@ -106,7 +107,10 @@ export default {
           align: 'start',
           value: 'title',
         },
-        { text: 'Repo', value: 'repo' },
+        {
+          text: 'Repo',
+          value: 'repo',
+        },
         {
           text: 'Created@',
           value: 'friendlyCreatedAt',
@@ -130,16 +134,13 @@ export default {
   methods: {
     datesort(value, sortBy, isDesc) {
       return value.sort((a, b) => {
-        const datesort = (aa, bb) => {
-          const dateA = new Date(aa.callDateTime);
-          const dateB = new Date(bb.callDateTime);
+        const dateA = new Date(a.callDateTime);
+        const dateB = new Date(b.callDateTime);
 
-          if (!isDesc) {
-            return dateA >= dateB ? 1 : -1;
-          }
-          return dateA <= dateB ? 1 : -1;
-        };
-        return datesort(a, b);
+        if (!isDesc) {
+          return dateA >= dateB ? 1 : -1;
+        }
+        return dateA <= dateB ? 1 : -1;
       });
     },
     issuesFilter(value, search) {
