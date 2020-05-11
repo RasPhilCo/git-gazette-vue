@@ -1,8 +1,7 @@
 <template>
   <v-app id="app">
-    <v-overlay v-if="loading"
-      :absolute="absolute"
-      :value="overlay"
+    <v-overlay
+      v-if="loading"
     >
         <v-progress-circular
           :size="70"

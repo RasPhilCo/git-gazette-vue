@@ -2,7 +2,7 @@
   <v-row class="mb-6">
     <v-col>
       <v-card-title>
-        Issues ({{issues.length}})
+        Issues ({{issues.length}} open)
 
         <v-spacer></v-spacer>
 
@@ -29,11 +29,12 @@
         @click:row="goto"
         :sort-by="['friendlyUpdatedAt']"
         :sort-desc="[true]"
+        :custom-sort="customSort"
       >
         <template v-slot:item.title="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <span v-on="on">{{item.title}}</span>
+              <span v-on="on" class="purple-text">{{item.title}}</span>
             </template>
             <span>{{item.body}}</span>
           </v-tooltip>
@@ -43,7 +44,7 @@
 
     <v-col>
       <v-card-title>
-        Pull Requests ({{prs.length}})
+        Pull Requests ({{prs.length}} open)
         <v-spacer></v-spacer>
         <v-text-field
           v-model="prsSearch"
@@ -68,11 +69,12 @@
         @click:row="goto"
         :sort-by="['friendlyUpdatedAt']"
         :sort-desc="[true]"
+        :custom-sort="customSort"
       >
         <template v-slot:item.title="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <span v-on="on">{{item.title}}</span>
+              <span v-on="on" class="purple-text">{{item.title}}</span>
             </template>
             <span>{{item.body}}</span>
           </v-tooltip>
@@ -82,6 +84,12 @@
   </v-row>
 </template>
 
+<style>
+.purple-text {
+  color: purple;
+}
+</style>
+
 <script>
 import store from '../store';
 
@@ -90,8 +98,8 @@ export default {
   data() {
     return {
       pagination: {
-        rowsPerPageItems: [30, 100],
-        rowsPerPage: 30,
+        rowsPerPageItems: [50, 100],
+        rowsPerPage: 50,
       },
       issuesSearch: '',
       prsSearch: '',
@@ -114,12 +122,10 @@ export default {
         {
           text: 'Created@',
           value: 'friendlyCreatedAt',
-          sort: this.dateSort,
         },
         {
           text: 'Updated@',
           value: 'friendlyUpdatedAt',
-          sort: this.dateSort,
         },
       ];
     },
@@ -132,16 +138,30 @@ export default {
       });
   },
   methods: {
-    datesort(value, sortBy, isDesc) {
-      return value.sort((a, b) => {
-        const dateA = new Date(a.callDateTime);
-        const dateB = new Date(b.callDateTime);
+    customSort(items, index, isDesc) {
+      // only single sort supported for now
+      const i = index[0];
+      const desc = isDesc[0];
+      const sorted = items.sort((a, b) => {
+        if (i === 'friendlyCreatedAt' || i === 'friendlyUpdatedAt') {
+          const key = i === 'friendlyCreatedAt' ? 'created_at' : 'updated_at';
+          const dateA = new Date(a[key]);
+          const dateB = new Date(b[key]);
 
-        if (!isDesc) {
-          return dateA >= dateB ? 1 : -1;
+          if (!desc) {
+            return dateA >= dateB ? 1 : -1;
+          }
+          // else
+          return dateA <= dateB ? 1 : -1;
         }
-        return dateA <= dateB ? 1 : -1;
+        // else
+        if (!desc) {
+          return a[i] < b[i] ? -1 : 1;
+        }
+        // else
+        return b[i] < a[i] ? -1 : 1;
       });
+      return sorted;
     },
     issuesFilter(value, search) {
       return this.sharedSearch(value, search);
