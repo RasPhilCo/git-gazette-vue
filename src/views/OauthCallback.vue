@@ -9,20 +9,13 @@ export default {
   name: 'OauthCallback',
   async mounted() {
     const response = await axios.post(`${process.env.VUE_APP_GAZETTE_API_URL}/exchange`, {
-      method: 'post',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ code: this.$route.query.code }),
+      code: this.$route.query.code,
     });
-    console.dir(response);
     const asEntries = new URLSearchParams(response.data);
     // eslint-disable-next-line camelcase
     const { access_token } = Object.fromEntries(asEntries);
     // eslint-disable-next-line camelcase
     const accessToken = access_token;
-    console.dir('Storing access token...');
     // eslint-disable-next-line camelcase
     localStorage.accessToken = access_token;
 
@@ -36,8 +29,7 @@ export default {
     });
 
     const orgs = respInstallations.data.installations
-      .filter((f) => f.target_type !== 'Organization').map((i) => i.account.login);
-    localStorage.orgs = JSON.stringify(orgs);
+      .filter((f) => f.target_type === 'Organization').map((i) => i.account.login);
     console.dir(`Storing org: ${orgs} ...`);
 
     window.location.replace('/');

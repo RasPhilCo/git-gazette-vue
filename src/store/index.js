@@ -41,6 +41,7 @@ export default new Vuex.Store({
       const fetchPage = async (page) => {
         const org = localStorage.currentOrg;
         const appToken = localStorage.accessToken;
+        if (!org || !appToken) return;
 
         console.dir(`Fetching issues for ${org}, page ${page}...`);
 

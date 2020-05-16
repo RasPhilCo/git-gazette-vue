@@ -1,7 +1,7 @@
 <template>
   <v-app id="app">
     <v-overlay
-      v-if="loading"
+      v-if="currentOrg && loading"
     >
         <v-progress-circular
           :size="70"
@@ -39,7 +39,6 @@
             :key="item.title"
             link
             :href="item.link"
-            target="_blank"
           >
             <v-list-item-icon>
               <v-icon>{{ item.icon }}</v-icon>
