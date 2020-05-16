@@ -110,7 +110,7 @@ export default {
     },
     lenIssues: () => store.state.issues.filter((i) => !i.isPullRequest).length,
     lenPrs: () => store.state.issues.filter((i) => i.isPullRequest).length,
-    orgs: () => JSON.parse(localStorage.orgs || []),
+    orgs: () => JSON.parse(localStorage.orgs || '[]'),
     loading: () => store.state.loading,
   },
   methods: {
