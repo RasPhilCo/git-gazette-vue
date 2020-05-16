@@ -1,5 +1,6 @@
 <template>
-  <v-row class="mb-6">
+<v-container fluid>
+  <v-row>
     <v-col>
       <v-card-title>
         Issues ({{issues.length}} open)
@@ -82,6 +83,7 @@
       </v-data-table>
     </v-col>
   </v-row>
+</v-container>
 </template>
 
 <style>
