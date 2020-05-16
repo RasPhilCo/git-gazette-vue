@@ -92,7 +92,7 @@ export default {
         {
           title: 'Add org',
           icon: 'mdi-plus-box-multiple',
-          link: `"https://github.com/apps/${process.env.VUE_APP_GITHUB_APP_NAME}/installations/new`,
+          link: `https://github.com/apps/${process.env.VUE_APP_GITHUB_APP_NAME}/installations/new`,
         },
       ],
     },
