@@ -89,6 +89,11 @@ export default {
           icon: 'mdi-account-key-outline',
           link: `https://github.com/login/oauth/authorize?client_id=${process.env.VUE_APP_GITHUB_CLIENT_ID}`,
         },
+        {
+          title: 'Add org',
+          icon: 'mdi-plus-box-multiple',
+          link: `"https://github.com/apps/${process.env.VUE_APP_GITHUB_APP_NAME}/installations/new`,
+        },
       ],
     },
     footer: {
