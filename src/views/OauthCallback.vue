@@ -30,6 +30,9 @@ export default {
 
     const orgs = respInstallations.data.installations
       .filter((f) => f.target_type === 'Organization').map((i) => i.account.login);
+    localStorage.orgs = JSON.stringify(orgs);
+    // eslint-disable-next-line prefer-destructuring
+    localStorage.currentOrg = orgs[0];
     console.dir(`Storing org: ${orgs} ...`);
 
     window.location.replace('/');
