@@ -172,19 +172,17 @@ export default {
       return this.sharedSearch(value, search);
     },
     sharedSearch(value, search) {
-      function matchWords(subject, searchTerms) {
-        const words = searchTerms;
+      function matchChunks(subject, searchTerms) {
+        const chunk = searchTerms.split(' ');
         const regexMetachars = /[(){[*+?.\\^$|]/g;
 
-        for (let i = 0; i < words.length; i += 1) {
-          words[i] = words[i].replace(regexMetachars, '\\$&');
+        for (let i = 0; i < chunk.length; i += 1) {
+          chunk[i] = chunk[i].replace(regexMetachars, '\\$&');
         }
-
-        const regex = new RegExp(`\\b(?:${words.join('|')})\\b`, 'gi');
-
+        const regex = new RegExp(chunk.map((w) => `\\b(.*?${w}).*?`).join(''), 'gi');
         if (subject.match(regex)) return subject;
       }
-      return matchWords(value, search);
+      return matchChunks(value, search);
     },
     goto(row) {
       window.open(row.url);
